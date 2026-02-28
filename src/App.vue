@@ -1,11 +1,14 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import DeckCard from './components/DeckCard.vue'
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div class="flex h-screen w-3/5 flex-col justify-center">
+    <div class="bg-dark-bg flex h-1/2 flex-col justify-between rounded-2xl px-[3vw] py-[3vh]">
+      <div class="flex justify-center"><DeckCard /><DeckCard /></div>
+      <div class="flex justify-center"><DeckCard /><DeckCard /></div>
+    </div>
+  </div>
 </template>
 
 <style scoped></style>

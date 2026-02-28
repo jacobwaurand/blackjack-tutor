@@ -1,0 +1,27 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: rgb(42, 48, 60);
+  --color-dark-bg: rgb(34, 39, 49);
+  --color-text: rgb(178, 204, 214);
+  --color-primary: rgb(159, 232, 141);
+  --color-secondary: rgb(255, 125, 93);
+  --color-teriary: rgb(199, 146, 233);
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--color-bg);
+  color: rgb(34, 39, 49);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
