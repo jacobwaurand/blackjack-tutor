@@ -16,10 +16,11 @@ export const usePlayerStore = defineStore('player', () => {
   // track wagers on each hand separately; totalBet is computed
   const handBet: Ref<number> = ref(0)
   const splitBet: Ref<number> = ref(0)
+  const insuranceBet: Ref<number> = ref(0)
   /** The bet value the player explicitly selected — never mutated by double/split. */
   const savedBet: Ref<number> = ref(0)
 
-  const totalBet = computed(() => handBet.value + splitBet.value)
+  const totalBet = computed(() => handBet.value + splitBet.value + insuranceBet.value)
 
   const handTotal: Ref<number[]> = computed(() => hand.value.values)
 
@@ -35,6 +36,10 @@ export const usePlayerStore = defineStore('player', () => {
 
   const canBet = computed(() => {
     return handBet.value >= 0 && handBet.value <= bankStore.bank
+  })
+
+  const canAcceptInsurance = computed(() => {
+    return insuranceBet.value === 0 && bankStore.bank >= handBet.value / 2
   })
 
   const canDouble = computed(() => {
@@ -104,6 +109,17 @@ export const usePlayerStore = defineStore('player', () => {
     stand()
   }
 
+  function acceptInsurance() {
+    if (!canAcceptInsurance.value) return
+    insuranceBet.value = Math.floor(handBet.value / 2)
+    bankStore.subtractMoney(insuranceBet.value)
+    blackjackStore.gameState = 'inProgress'
+  }
+
+  function declineInsurance() {
+    blackjackStore.gameState = 'inProgress'
+  }
+
   /** Add a chip amount to the pending wager (capped at bank balance). */
   function addToBet(amount: number) {
     const max = bankStore.bank
@@ -115,6 +131,7 @@ export const usePlayerStore = defineStore('player', () => {
   function clearBet() {
     handBet.value = 0
     savedBet.value = 0
+    insuranceBet.value = 0
   }
 
   /** Deduct the pending wager from the bank — call this when round starts. */
@@ -155,6 +172,10 @@ export const usePlayerStore = defineStore('player', () => {
     canDouble,
     canSplit,
     myTurn,
+    insuranceBet,
+    canAcceptInsurance,
+    acceptInsurance,
+    declineInsurance,
     hit,
     stand,
     split,

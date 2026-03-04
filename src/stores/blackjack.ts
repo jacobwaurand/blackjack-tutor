@@ -10,12 +10,21 @@ import { useStatsStore } from './stats'
 export const useBlackjackStore = defineStore('blackjack', () => {
   // global turn tracker
   const whosTurn: Ref<'player' | 'dealer' | 'split' | null> = ref('player')
-  const gameState: Ref<'betting' | 'inProgress' | 'roundOver'> = ref('betting')
+  const gameState: Ref<'betting' | 'insurance' | 'inProgress' | 'roundOver'> = ref('betting')
 
   const deckStore = useDeckStore()
   const dealerStore = useDealerStore()
   const playerStore = usePlayerStore()
   const statsStore = useStatsStore()
+
+  const shouldOfferInsurance = computed(() => {
+    return (
+      whosTurn.value === 'player' &&
+      gameState.value === 'inProgress' &&
+      dealerStore.hand.cards.length === 2 &&
+      dealerStore.hand.cards.filter((c) => c.isFaceUp).map((c) => c.rank.text)[0] === 'A'
+    )
+  })
 
   function startRound() {
     if (deckStore.isPenetrationReached) {
@@ -35,6 +44,10 @@ export const useBlackjackStore = defineStore('blackjack', () => {
     drawCardTo(dealerStore.hand, false) // dealer's first card face down
     drawCardTo(playerStore.hand)
     drawCardTo(dealerStore.hand)
+
+    if (dealerStore.hand.cards[1]?.rank?.text === 'A') {
+      gameState.value = 'insurance'
+    }
 
     // Check for player blackjack right after initial deal
     if (isBlackjack(playerStore.hand.cards)) {
@@ -124,6 +137,12 @@ export const useBlackjackStore = defineStore('blackjack', () => {
       if (playerHasSplit) {
         totalPayout += evaluate(p.splitHand, p.splitBet, playerHasSplit)
       }
+      if (p.insuranceBet > 0) {
+        // handle insurance payout
+        if (isBlackjack(dealerStore.hand.cards)) {
+          p.receiveWinnings(p.insuranceBet * 2)
+        }
+      }
       if (totalPayout > 0) {
         p.receiveWinnings(totalPayout)
       }
@@ -152,5 +171,6 @@ export const useBlackjackStore = defineStore('blackjack', () => {
     drawCardTo,
     advanceTurn,
     determineWinner,
+    shouldOfferInsurance,
   }
 })
