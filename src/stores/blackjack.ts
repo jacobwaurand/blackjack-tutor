@@ -4,7 +4,7 @@ import type { Card } from '../models/card'
 import { useDeckStore } from './deck'
 import { useDealerStore } from './dealer'
 import { usePlayerStore } from './player'
-import type { Hand } from '@/models/hand'
+import { Hand } from '@/models/hand'
 import { useStatsStore } from './stats'
 
 export const useBlackjackStore = defineStore('blackjack', () => {
@@ -22,6 +22,7 @@ export const useBlackjackStore = defineStore('blackjack', () => {
       deckStore.initialize()
       deckStore.shuffle()
     }
+    playerStore.confirmBet()
     gameState.value = 'inProgress'
     dealerStore.resetHand()
     playerStore.resetHands()
@@ -80,13 +81,11 @@ export const useBlackjackStore = defineStore('blackjack', () => {
   }
 
   function determineWinner(players: Array<ReturnType<typeof usePlayerStore>> = [playerStore]) {
-    const dealerTotals = calculateHandValues(dealerStore.hand.cards)
-    const dealerBest = getBestValue(dealerTotals)
+    const dealerBest = getBestValue(dealerStore.hand.values)
 
     // helper used for both main and split hands
     const evaluate = (hand: Hand, betAmount: number, playerHasSplit: boolean): number /* payout amount */ => {
-      const totals = calculateHandValues(hand.cards)
-      const best = getBestValue(totals)
+      const best = getBestValue(hand.values)
       const blackjack = isBlackjack(hand.cards)
 
       // bust
@@ -146,39 +145,12 @@ export const useBlackjackStore = defineStore('blackjack', () => {
     return (isAce(a) && isTenValue(b)) || (isAce(b) && isTenValue(a))
   }
 
-  // ---------- shared utility ----------
-  function calculateHandValues(hand: Card[]): number[] {
-    let totals: number[] = [0]
-
-    for (const card of hand) {
-      // Determine the numerical values for this card (ace can be [1, 11])
-      const cardValues: number[] = card.rank.values
-      const newTotals: number[] = []
-      for (const t of totals) {
-        for (const v of cardValues) {
-          newTotals.push(t + v)
-        }
-      }
-      totals = [...new Set(newTotals)]
-    }
-    return totals.sort((a, b) => a - b)
-  }
-
-  function getBestHandValue(hand: Card[]): number {
-    const totals = calculateHandValues(hand)
-    const validTotals = totals.filter((t) => t <= 21)
-    if (validTotals.length === 0) return Math.min(...totals) // all totals are bust, return lowest (least bad) value
-    return Math.max(...validTotals)
-  }
-
   return {
     gameState,
     whosTurn,
     startRound,
     drawCardTo,
     advanceTurn,
-    calculateHandValues,
     determineWinner,
-    getBestHandValue,
   }
 })

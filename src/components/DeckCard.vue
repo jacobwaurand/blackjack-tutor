@@ -40,7 +40,29 @@ const activeClass = computed(() => {
     <div class="flex flex-row justify-center text-4xl font-bold">{{ rank }}</div>
     <div class="flex flex-row justify-end font-semibold">{{ rank }}</div>
   </div>
-  <div v-else class="m-1 flex h-35 w-25 flex-col justify-between rounded-md border-2 border-white bg-red-500 p-2"></div>
+  <div v-else class="card-back m-1 flex h-35 w-25 flex-col rounded-md border-2 border-white/70 p-1.5">
+    <div class="card-back-inner h-full w-full rounded-sm border border-white/40" />
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.card-back {
+  background-color: #991b1b;
+}
+.card-back-inner {
+  background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.07) 0px,
+      rgba(255, 255, 255, 0.07) 1px,
+      transparent 1px,
+      transparent 8px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.07) 0px,
+      rgba(255, 255, 255, 0.07) 1px,
+      transparent 1px,
+      transparent 8px
+    );
+}
+</style>

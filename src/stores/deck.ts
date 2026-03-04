@@ -22,10 +22,11 @@ export const useDeckStore = defineStore('deck', () => {
     { text: 'K', values: [10] },
     { text: 'A', values: [1, 11] },
   ])
-  const penetrationPercentage = 0.75
+  const penetrationPercentage = 25
 
   const cardsRemaining = computed(() => deck.value.length)
-  const isPenetrationReached = computed(() => cardsRemaining.value < 52 * numOfDecks.value * penetrationPercentage)
+  const currentPenetration = computed(() => Math.round(((numOfDecks.value * 52 - deck.value.length) / (numOfDecks.value * 52)) * 100))
+  const isPenetrationReached = computed(() => currentPenetration.value >= penetrationPercentage)
 
   const averageCardValue = computed(() => {
     if (deck.value.length === 0) return 0
@@ -40,6 +41,12 @@ export const useDeckStore = defineStore('deck', () => {
     const values = deck.value.map((card) => (card.rank ? Math.max(...card.rank.values) : 0)).sort((a, b) => a - b)
     const mid = Math.floor(values.length / 2)
     return values.length % 2 !== 0 ? values[mid] : ((values[mid - 1] ?? 0) + (values[mid] ?? 0)) / 2
+  })
+
+  const highCardPercentage = computed(() => {
+    if (deck.value.length === 0) return 0
+    const highCards = deck.value.filter((card) => card.rank && Math.max(...card.rank.values) >= 10).length
+    return Math.round((highCards / deck.value.length) * 100)
   })
 
   function initialize() {
@@ -80,5 +87,16 @@ export const useDeckStore = defineStore('deck', () => {
     return card
   }
 
-  return { deck, initialize, shuffle, drawCard, isPenetrationReached, averageCardValue, medianCardValue }
+  return {
+    deck,
+    initialize,
+    shuffle,
+    drawCard,
+    currentPenetration,
+    isPenetrationReached,
+    cardsRemaining,
+    averageCardValue,
+    medianCardValue,
+    highCardPercentage,
+  }
 })

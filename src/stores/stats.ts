@@ -26,5 +26,16 @@ export const useStatsStore = defineStore('stats', () => {
     totalRounds.value++
   }
 
-  return { totalRounds, playerWins, dealerWins, pushes, playerWinRate, dealerWinRate, pushRate, recordPlayerWin, recordDealerWin, recordPush }
+  return {
+    totalRounds,
+    playerWins,
+    dealerWins,
+    pushes,
+    playerWinRate,
+    dealerWinRate,
+    pushRate,
+    recordPlayerWin,
+    recordDealerWin,
+    recordPush,
+  }
 })

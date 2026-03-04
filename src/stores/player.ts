@@ -1,6 +1,6 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { Hand } from '../models/hand'
+import { Hand } from '../models/hand'
 import { useBlackjackStore } from './blackjack'
 import { useDeckStore } from './deck'
 import { useBankStore } from './bank'
@@ -10,23 +10,20 @@ export const usePlayerStore = defineStore('player', () => {
   const deckStore = useDeckStore()
   const bankStore = useBankStore()
 
-  const hand: Ref<Hand> = ref({ cards: [], result: null })
-  const splitHand: Ref<Hand> = ref({ cards: [], result: null })
+  const hand: Ref<Hand> = ref(new Hand())
+  const splitHand: Ref<Hand> = ref(new Hand())
 
   // track wagers on each hand separately; totalBet is computed
-  const betAmount: Ref<number> = ref(0)
   const handBet: Ref<number> = ref(0)
   const splitBet: Ref<number> = ref(0)
+  /** The bet value the player explicitly selected — never mutated by double/split. */
+  const savedBet: Ref<number> = ref(0)
 
   const totalBet = computed(() => handBet.value + splitBet.value)
 
-  const handTotal: Ref<number[]> = computed(() => {
-    return blackjackStore.calculateHandValues(hand.value.cards)
-  })
+  const handTotal: Ref<number[]> = computed(() => hand.value.values)
 
-  const splitTotal: Ref<number[]> = computed(() => {
-    return blackjackStore.calculateHandValues(splitHand.value.cards)
-  })
+  const splitTotal: Ref<number[]> = computed(() => splitHand.value.values)
 
   const didPlayerBust = computed(() => {
     return Math.min(...handTotal.value) > 21
@@ -38,6 +35,12 @@ export const usePlayerStore = defineStore('player', () => {
 
   const canBet = computed(() => {
     return handBet.value >= 0 && handBet.value <= bankStore.bank
+  })
+
+  const canDouble = computed(() => {
+    if (!myTurn.value) return false
+    const activebet = blackjackStore.whosTurn === 'split' ? splitBet.value : handBet.value
+    return activebet <= bankStore.bank
   })
 
   const canSplit = computed(() => {
@@ -67,7 +70,7 @@ export const usePlayerStore = defineStore('player', () => {
     if (blackjackStore.whosTurn === 'split' && !canHitSplit.value) return
     const handToHit = blackjackStore.whosTurn === 'player' ? hand : splitHand
     blackjackStore.drawCardTo(handToHit.value)
-    if (blackjackStore.getBestHandValue(handToHit.value.cards) > 21) {
+    if (handToHit.value.bestValue > 21) {
       blackjackStore.advanceTurn()
     }
   }
@@ -88,7 +91,7 @@ export const usePlayerStore = defineStore('player', () => {
   }
 
   function double() {
-    if (!myTurn.value || !canBet.value) return
+    if (!myTurn.value || !canDouble.value) return
     // determine which hand is being doubled and deduct additional wager
     if (blackjackStore.whosTurn === 'split') {
       bankStore.subtractMoney(splitBet.value)
@@ -101,10 +104,30 @@ export const usePlayerStore = defineStore('player', () => {
     stand()
   }
 
-  function resetHands() {
-    hand.value = { cards: [], result: null }
-    splitHand.value = { cards: [], result: null }
+  /** Add a chip amount to the pending wager (capped at bank balance). */
+  function addToBet(amount: number) {
+    const max = bankStore.bank
+    handBet.value = Math.min(handBet.value + amount, max)
+    savedBet.value += amount
+  }
+
+  /** Clear the pending wager without deducting from the bank. */
+  function clearBet() {
     handBet.value = 0
+    savedBet.value = 0
+  }
+
+  /** Deduct the pending wager from the bank — call this when round starts. */
+  function confirmBet() {
+    if (handBet.value <= 0) return
+    bankStore.subtractMoney(savedBet.value)
+  }
+
+  function resetHands() {
+    hand.value = new Hand()
+    splitHand.value = new Hand()
+    // Restore to what the player explicitly selected, not the doubled/split amount
+    handBet.value = savedBet.value
     splitBet.value = 0
   }
 
@@ -114,6 +137,7 @@ export const usePlayerStore = defineStore('player', () => {
 
   function setBetAmount(amount: number) {
     handBet.value = amount
+    savedBet.value = amount
   }
 
   return {
@@ -125,14 +149,19 @@ export const usePlayerStore = defineStore('player', () => {
     didSplitBust,
     handBet,
     splitBet,
+    savedBet,
     totalBet,
     canBet,
+    canDouble,
     canSplit,
     myTurn,
     hit,
     stand,
     split,
     double,
+    addToBet,
+    clearBet,
+    confirmBet,
     resetHands,
     receiveWinnings,
     setBetAmount,
