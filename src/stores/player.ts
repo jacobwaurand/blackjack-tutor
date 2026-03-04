@@ -50,7 +50,7 @@ export const usePlayerStore = defineStore('player', () => {
 
   const canHitHand = computed(() => {
     if (hand.value.cards.length === 0) return false
-    if (hand.value.cards[0]?.rank.text === 'A' && hand.value.cards.length === 2) return false // disallow hitting after splitting Aces
+    if (hand.value.cards[0]?.rank.text === 'A' && splitHand.value.cards.length === 2) return false // disallow hitting after splitting Aces
     return blackjackStore.whosTurn === 'player' && handTotal.value.some((t) => t < 21)
   })
 
