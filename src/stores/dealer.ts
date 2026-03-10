@@ -8,6 +8,9 @@ export const useDealerStore = defineStore('dealer', () => {
   const blackjackStore = useBlackjackStore()
 
   const myTurn = computed(() => blackjackStore.whosTurn === 'dealer')
+  const isBlackjack = computed(() => {
+    return hand.value.cards.length === 2 && hand.value.bestValue === 21
+  })
 
   function resetHand() {
     hand.value = new Hand()
@@ -28,5 +31,5 @@ export const useDealerStore = defineStore('dealer', () => {
     blackjackStore.advanceTurn()
   }
 
-  return { hand, playTurn, resetHand }
+  return { hand, playTurn, resetHand, isBlackjack }
 })

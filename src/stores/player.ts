@@ -146,6 +146,7 @@ export const usePlayerStore = defineStore('player', () => {
     // Restore to what the player explicitly selected, not the doubled/split amount
     handBet.value = savedBet.value
     splitBet.value = 0
+    insuranceBet.value = 0
   }
 
   function receiveWinnings(amount: number) {

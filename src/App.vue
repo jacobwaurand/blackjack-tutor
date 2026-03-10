@@ -48,6 +48,13 @@ function split() {
 function double() {
   playerStore.double()
 }
+
+function acceptInsurance() {
+  playerStore.acceptInsurance()
+  if (dealerStore.isBlackjack) {
+    blackjackStore.advanceTurn()
+  }
+}
 </script>
 
 <template>
@@ -108,9 +115,12 @@ function double() {
       </div>
       <AppButton label="Deal" :icon="Play" :disabled="!canStartRound" @click="startGame()" />
     </div>
-    <div v-else-if="blackjackStore.gameState === 'insurance'" class="flex content-center justify-center">
-      <AppButton label="Yes" :icon="Plus" @click="playerStore.acceptInsurance()" />
-      <AppButton label="No" :icon="Hand" variant="secondary" @click="playerStore.declineInsurance()" />
+    <div v-else-if="blackjackStore.gameState === 'insurance'" class="flex flex-col content-center items-center justify-center">
+      <div>Accept Insurance Bet?</div>
+      <div class="flex content-center justify-center">
+        <AppButton label="Yes" :icon="Plus" @click="acceptInsurance" />
+        <AppButton label="No" :icon="Hand" variant="secondary" @click="playerStore.declineInsurance()" />
+      </div>
     </div>
     <div v-else class="flex content-center justify-center">
       <AppButton label="Hit" :icon="Plus" @click="hit()" />
