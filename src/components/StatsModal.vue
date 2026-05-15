@@ -38,6 +38,30 @@ function onDragEnd() {
   window.removeEventListener('mouseup', onDragEnd)
 }
 
+function onTouchStart(e: TouchEvent) {
+  const touch = e.touches[0]
+  dragging = true
+  dragOffsetX = touch.clientX - x.value
+  dragOffsetY = touch.clientY - y.value
+  window.addEventListener('touchmove', onTouchMove, { passive: false })
+  window.addEventListener('touchend', onTouchEnd)
+}
+
+function onTouchMove(e: TouchEvent) {
+  if (!dragging) return
+  e.preventDefault()
+  const touch = e.touches?.[0]
+  if (!touch) return
+  x.value = touch.clientX - dragOffsetX
+  y.value = touch.clientY - dragOffsetY
+}
+
+function onTouchEnd() {
+  dragging = false
+  window.removeEventListener('touchmove', onTouchMove)
+  window.removeEventListener('touchend', onTouchEnd)
+}
+
 const rows = computed(() => [
   {
     label: 'Win',
@@ -83,14 +107,23 @@ const rows = computed(() => [
   >
     <div v-if="isOpen" class="bg-dark-bg fixed z-50 w-80 rounded-2xl shadow-2xl select-none" :style="{ left: `${x}px`, top: `${y}px` }">
       <!-- Drag handle / header -->
-      <div class="flex cursor-grab items-center justify-between rounded-t-2xl px-5 pt-5 pb-3 active:cursor-grabbing" @mousedown="onDragStart">
+      <div
+        class="flex cursor-grab items-center justify-between rounded-t-2xl px-5 pt-5 pb-3 active:cursor-grabbing"
+        @mousedown="onDragStart"
+        @touchstart.prevent="onTouchStart"
+      >
         <div class="flex items-center gap-2">
           <TrendingUp class="text-primary" :size="20" />
           <span class="text-lg font-bold tracking-wide">Session Stats</span>
         </div>
         <div class="flex items-center gap-1">
           <GripHorizontal class="text-text/30" :size="16" />
-          <button class="text-text/50 hover:text-text cursor-pointer rounded-md p-1 transition-colors" @mousedown.stop @click="isOpen = false">
+          <button
+            class="text-text/50 hover:text-text cursor-pointer rounded-md p-1 transition-colors"
+            @mousedown.stop
+            @touchstart.stop
+            @click="isOpen = false"
+          >
             <X :size="18" />
           </button>
         </div>

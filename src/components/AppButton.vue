@@ -5,7 +5,7 @@ const props = withDefaults(
   defineProps<{
     label: string
     icon?: Component
-    variant?: 'primary' | 'secondary' | 'tertiary'
+    variant?: 'primary' | 'secondary' | 'tertiary' | 'quarternary'
     disabled?: boolean
   }>(),
   {
@@ -18,6 +18,7 @@ const variantClasses: Record<string, string> = {
   primary: 'bg-primary hover:brightness-110 text-dark-bg',
   secondary: 'bg-secondary hover:brightness-110 text-dark-bg',
   tertiary: 'bg-tertiary hover:brightness-110 text-dark-bg',
+  quarternary: 'bg-quarternary hover:brightness-110 text-dark-bg',
 }
 </script>
 

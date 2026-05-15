@@ -58,7 +58,7 @@ function acceptInsurance() {
 </script>
 
 <template>
-  <div class="flex h-screen w-3/5 flex-col content-center justify-center">
+  <div class="flex h-screen w-full flex-col content-center justify-center px-3 sm:w-11/12 sm:px-0 lg:w-3/5">
     <StatsModal />
     <div class="flex min-h-1/2 flex-row justify-between">
       <div
@@ -122,11 +122,25 @@ function acceptInsurance() {
         <AppButton label="No" :icon="Hand" variant="secondary" @click="playerStore.declineInsurance()" />
       </div>
     </div>
-    <div v-else class="flex content-center justify-center">
-      <AppButton label="Hit" :icon="Plus" @click="hit()" />
-      <AppButton label="Stand" :icon="Hand" variant="secondary" @click="stand()" />
-      <AppButton label="Split" :icon="GitFork" variant="tertiary" @click="split()" :disabled="!playerStore.canSplit" />
-      <AppButton label="Double" :icon="ChevronsRight" variant="secondary" @click="double()" :disabled="!playerStore.canDouble" />
+    <div v-else class="flex flex-wrap content-center justify-center">
+      <AppButton class="w-[calc(50%-12px)] sm:w-auto" label="Hit" :icon="Plus" @click="hit()" />
+      <AppButton class="w-[calc(50%-12px)] sm:w-auto" label="Stand" :icon="Hand" variant="secondary" @click="stand()" />
+      <AppButton
+        class="w-[calc(50%-12px)] sm:w-auto"
+        label="Split"
+        :icon="GitFork"
+        variant="tertiary"
+        @click="split()"
+        :disabled="!playerStore.canSplit"
+      />
+      <AppButton
+        class="w-[calc(50%-12px)] sm:w-auto"
+        label="Double"
+        :icon="ChevronsRight"
+        variant="quarternary"
+        @click="double()"
+        :disabled="!playerStore.canDouble"
+      />
     </div>
     <div class="mt-1 flex items-center justify-center gap-6 text-sm">
       <span class="text-text/50"
