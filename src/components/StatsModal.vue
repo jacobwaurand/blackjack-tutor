@@ -40,6 +40,7 @@ function onDragEnd() {
 
 function onTouchStart(e: TouchEvent) {
   const touch = e.touches[0]
+  if (!touch) return
   dragging = true
   dragOffsetX = touch.clientX - x.value
   dragOffsetY = touch.clientY - y.value
